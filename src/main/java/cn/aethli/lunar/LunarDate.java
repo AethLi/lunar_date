@@ -255,6 +255,7 @@ public class LunarDate {
         .of(gregorianDate.getYear(), thisYearInfo[1], thisYearInfo[2]);
     if (!thisChineseNewYear.isBefore(gregorianDate)) {
       thisYearInfo = YEAR_INFO[gregorianDate.getYear() - MinLunarYear - 1];
+      thisChineseNewYear = LocalDate.of(gregorianDate.getYear()-1, thisYearInfo[1], thisYearInfo[2]);
     }
     long between = ChronoUnit.DAYS.between(thisChineseNewYear, gregorianDate);
     year = thisChineseNewYear.getYear();
@@ -278,7 +279,7 @@ public class LunarDate {
     //dayName
     if (day + 1 <= 10) {
       dayName += DAY_HEADER[0];
-      dayName += NUMBER[day + 1 + 1];
+      dayName += NUMBER[day + 1];
     } else if (day + 1 < 20) {
       dayName += DAY_HEADER[1];
       dayName += NUMBER[day + 1 - 10];
@@ -293,14 +294,14 @@ public class LunarDate {
     if (thisYearInfo[0] == 0) {
       thisYearInfo[0] = 999;
     }
-    if (month + 1 < thisYearInfo[0]) {
+    if (month + 1 < thisYearInfo[0] + 1) {
       monthName = MONTH_NAME[month];
       index = 0;
-    } else if (month + 1 == thisYearInfo[0]) {//leap
+    } else if (month + 1 == thisYearInfo[0] + 1) {//leap
       monthName = LEAP_HEADER + MONTH_NAME[month - 1];
       index = 1;
     } else {
-      monthName = LEAP_HEADER + MONTH_NAME[month - 1];
+      monthName = MONTH_NAME[month - 1];
       index = 0;
     }
     //yearName
@@ -344,7 +345,7 @@ public class LunarDate {
   public String toString() {
     return String
         .format("lunar:%s-%s-%s-%s-%s-%s\tgregorian:%s", yearName, monthName, dayName, year,
-            month+1, day, gregorianDate.toString());
+            month + 1, day, gregorianDate.toString());
   }
 
   public LocalDate getGregorianDate() {
