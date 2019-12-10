@@ -1,6 +1,10 @@
 #主要功能
 1. 格里高利历转中国月历 √
-2. 中国月历转格利高利历 ×
+2. 中国月历转格利高利历 √
+
+#使用方法
+1. LunarDate.getInstance(LocalDate)获取一个LunarDate实例
+2. 没有2
 
 #数据来源
 1. C# ChineseLunisolarCalendar类的静态数据 √
