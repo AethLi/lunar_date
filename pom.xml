@@ -2,7 +2,7 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <artifactId>lunar</artifactId>
+  <artifactId>lunar-date</artifactId>
 
   <build>
     <plugins>
@@ -24,5 +24,30 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
-  <version>1.0</version>
+  <version>1.0-snapshot</version>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>actable</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <name>selcarpa</name>
+      <email>selcarpa@gmail.com</email>
+      <organization>aethli</organization>
+      <url>https://github.com/AethLi/lunar_date</url>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:git@github.com:AethLi/lunar_date.git</connection>
+    <developerConnection>scm:git:git@github.com:AethLi/lunar_date.git</developerConnection>
+    <url>https://github.com/AethLi/lunar_date</url>
+    <tag>1.0</tag>
+  </scm>
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/AethLi/lunar_date/issues</url>
+  </issueManagement>
 </project>
