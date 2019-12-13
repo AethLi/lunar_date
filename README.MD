@@ -16,7 +16,7 @@ pom.xml加入
 <dependency>
    <groupId>cn.aethli</groupId>
    <artifactId>lunar-date</artifactId>
-   <version>0.1.0</version>
+   <version>0.1.1</version>
  </dependency>
 ```
 
