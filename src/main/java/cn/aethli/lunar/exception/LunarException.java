@@ -1,9 +1,9 @@
 package cn.aethli.lunar.exception;
 
 /**
- * @author Termite
- * @device Hades
- * @date 2019-12-09 10:27
+ * just extends Exception
+ *
+ * @author selcarpa
  **/
 public class LunarException extends Exception {
 

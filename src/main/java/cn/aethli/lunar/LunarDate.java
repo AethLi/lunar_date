@@ -1,6 +1,7 @@
 package cn.aethli.lunar;
 
 import cn.aethli.lunar.exception.LunarException;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
@@ -15,17 +16,17 @@ import java.util.Objects;
  * <p>      Gregorian              1901/02/19          2101/01/28
  * <p>      LunarDate              1901/01/01          2100/12/29
  *
- * @author Termite
- * @device Hades
- * @date 2019-12-9 9:49
+ * @author selcarpa
  **/
-public class LunarDate {
+public class LunarDate implements Serializable {
+
+  private static final long serialVersionUID = 0x123456789abcdL;
 
   private static final int MIN_LUNAR_YEAR = 1901;
   private static final int MAX_LUNAR_YEAR = 2100;
   private static final int MAX_DAY_IN_YEAR = 384;
   private static final int MAX_LUNAR_MONTH = 13;
-  private static final int MAX_DAY_IN_MONTH = 30;
+  private static final int MAX_DAY_PER_MONTH = 30;
 //  private static final LocalDate MIN_DATE = LocalDate.of(1901, 2, 19);
 //  private static final LocalDate MAX_DATE = LocalDate.of(2101, 1, 28);
 
@@ -293,12 +294,13 @@ public class LunarDate {
     leapType = LeapType.NOT_LEAP;
     int[] daysPerMonth = toBinaryInts(thisYearInfo[3]);
     for (int i = 0; i < 16; i++) {
-      if ((daysPerMonth[i] == 0 ? 29 : 30) >= between) {
-        if (month == 0) {
-          day = (int) between;
-        } else {
-          day = (int) between - 1;
-        }
+      if ((daysPerMonth[i] == 0 ? 29 : 30) > between) {
+//        if (month == 0) {
+//          day = (int) between;
+//        } else {
+//          day = (int) between - 1;
+//        }
+        day = (int) between;
         break;
       } else {
         if (i == 15) {
@@ -313,38 +315,59 @@ public class LunarDate {
 
   }
 
-  private static int[] toBinaryInts(int res) {
-    int[] ints = new int[16];
-    for (int i = 16; i > 0; i--) {
-      ints[i - 1] = res % 2;
-      res = res / 2;
-    }
-    return ints;
-  }
-
   /**
-   * get a instance for LunarDate
+   * get a instance by a gregorian date
    *
-   * @param gregorianDate
-   * @return
-   * @throws LunarException
+   * @param gregorianDate gregorian date
+   * @return a already converted LunarDate
+   * @throws LunarException Exception with reason
    */
-  public static LunarDate getInstance(LocalDate gregorianDate) throws LunarException {
+  public static LunarDate ofDay(LocalDate gregorianDate) throws LunarException {
     if (gregorianDate.getYear() < MIN_LUNAR_YEAR || gregorianDate.getYear() > MAX_LUNAR_YEAR) {
       throw new LunarException("out of Range");
     }
     return new LunarDate(gregorianDate);
   }
 
+  /**
+   * get a instance by lunar date(year,month,day)
+   * <p>attention:LeapType.LEAP_0 Equivalent to LeapType.LEAP_0</p>
+   *
+   * @param year     lunar year
+   * @param month    lunar month
+   * @param day      lunar day
+   * @param leapType leap type
+   * @return a already converted LunarDate
+   * @throws LunarException Exception with reason
+   */
+  public static LunarDate ofDay(int year, int month, int day, LeapType leapType)
+      throws LunarException {
+    day -= 1;
+    if (year < MIN_LUNAR_YEAR || year > MAX_LUNAR_YEAR || month < 0 || month > MAX_LUNAR_MONTH
+        || day < 0 || day > MAX_DAY_PER_MONTH) {
+      throw new LunarException("out of Range");
+    }
+    return new LunarDate(year, month, day, leapType);
+  }
+
+
+  /**
+   * get a LunarDate array by gregorian date, from first day of month to end day of month
+   *
+   * @param gregorianDate gregorian date, only use year and month
+   * @return LunarDate array of a gregorian month
+   * @throws LunarException Exception with reason
+   */
   public static LunarDate[] ofMonth(LocalDate gregorianDate) throws LunarException {
-    LunarDate[] lunarDates = new LunarDate[MAX_DAY_IN_MONTH];
+    //gregorian month 31 days per a month
+    LunarDate[] lunarDates = new LunarDate[MAX_DAY_PER_MONTH + 1];
     if (gregorianDate.getYear() < MIN_LUNAR_YEAR || gregorianDate.getYear() > MAX_LUNAR_YEAR) {
       throw new LunarException("out of Range");
     }
     gregorianDate = gregorianDate.with(TemporalAdjusters.firstDayOfMonth());
     LocalDate endDate = gregorianDate.with(TemporalAdjusters.lastDayOfMonth());
     long between = ChronoUnit.DAYS.between(gregorianDate, endDate);
-    for (int i = 0; i < between; i++) {
+    for (int i = 0; i <= between; i++) {
       lunarDates[i] = new LunarDate(gregorianDate.plusDays(i));
     }
     ArrayList<LunarDate> dates = new ArrayList<>(Arrays.asList(lunarDates));
@@ -352,14 +375,24 @@ public class LunarDate {
     return dates.toArray(new LunarDate[0]);
   }
 
+  /**
+   * get a LunarDate array by lunar date, from first day of month to end day of month
+   * <p>attention:LeapType.LEAP_0 Equivalent to LeapType.LEAP_0</p>
+   *
+   * @param year     lunar date year
+   * @param month    lunar date month
+   * @param leapType leap type
+   * @return LunarDate array of a lunar date
+   * @throws LunarException Exception with reason
+   */
   public static LunarDate[] ofMonth(int year, int month, LeapType leapType) throws LunarException {
     List<LunarDate> lunarDateList = new ArrayList<>();
     if (year < MIN_LUNAR_YEAR || year > MAX_LUNAR_YEAR || month < 0 || month > MAX_LUNAR_MONTH) {
       throw new LunarException("out of Range");
     }
     int[] thisYearInfo = YEAR_INFO[year - MIN_LUNAR_YEAR];
-    int dayCount = 0;
-    if (leapType == LeapType.LEAP_1) {//todo leap month check
+    int dayCount;
+    if (leapType == LeapType.LEAP_1) {
       if (month == thisYearInfo[0]) {
         dayCount = toBinaryInts(thisYearInfo[3])[month - 2] == 0 ? 29 : 30;
       } else {
@@ -375,23 +408,13 @@ public class LunarDate {
     return lunarDateList.toArray(new LunarDate[0]);
   }
 
-  public int getYear() {
-    return year;
-  }
-
-  public int getMonth() {
-    if (leapType == LeapType.LEAP_1) {
-      return month;
+  private static int[] toBinaryInts(int res) {
+    int[] ints = new int[16];
+    for (int i = 16; i > 0; i--) {
+      ints[i - 1] = res % 2;
+      res = res / 2;
     }
-    return month + 1;
-  }
-
-  public LeapType getLeapType() {
-    return leapType;
-  }
-
-  public int getDay() {
-    return day + 1;
+    return ints;
   }
 
   private void updateLunarName(int[] thisYearInfo) {
@@ -446,33 +469,61 @@ public class LunarDate {
     yearName = yearName.replace("9", YEAR_NAME[9]);
   }
 
+  public LocalDate getGregorianDate() {
+    return gregorianDate;
+  }
+
+  /**
+   * set new gregorian date
+   *
+   * @param gregorianDate gregorian date
+   * @return a already converted LunarDate
+   * @throws LunarException Exception with reason
+   */
+  public LunarDate setGregorianDate(LocalDate gregorianDate) throws LunarException {
+    return ofDay(gregorianDate);
+  }
+
+  /**
+   * set a new lunar date
+   *
+   * @param year     lunar year
+   * @param month    lunar month
+   * @param day      lunar day
+   * @param leapType leap type
+   * @return a already converted LunarDate
+   * @throws LunarException Exception with reason
+   */
+  public LunarDate setLunarDate(int year, int month, int day, LeapType leapType)
+      throws LunarException {
+    return ofDay(year, month, day, leapType);
+  }
+
   @Override
   public String toString() {
-    //todo
     return String
         .format("lunar:%s-%s-%s-%s-%s-%s(%s)\tgregorian:%s", yearName, monthName, dayName,
             getYear(),
             getMonth(), getDay(), getLeapType().toString(), gregorianDate.toString());
   }
 
-  public LocalDate getGregorianDate() {
-    return gregorianDate;
+  public int getYear() {
+    return year;
   }
 
-  public LunarDate setGregorianDate(LocalDate gregorianDate) throws LunarException {
-    if (gregorianDate.getYear() < MIN_LUNAR_YEAR || gregorianDate.getYear() > MAX_LUNAR_YEAR) {
-      throw new LunarException("out of Range");
+  public int getMonth() {
+    if (leapType == LeapType.LEAP_1) {
+      return month;
     }
-    return new LunarDate(gregorianDate);
+    return month + 1;
   }
 
-  public LunarDate setLunarDate(int year, int month, int day, LeapType leapType)
-      throws LunarException {
-    if (year < MIN_LUNAR_YEAR || year > MAX_LUNAR_YEAR || month < 0 || month > MAX_LUNAR_MONTH
-        || day < 0 || day > MAX_DAY_IN_MONTH) {
-      throw new LunarException("out of Range");
-    }
-    return new LunarDate(year, month, day, leapType);
+  public LeapType getLeapType() {
+    return leapType;
+  }
+
+  public int getDay() {
+    return day + 1;
   }
 
   public enum LeapType {
