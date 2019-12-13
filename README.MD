@@ -10,5 +10,14 @@
 1. LunarDate：不继承于其他Java提供的类 √
 2. LunarLocalData:一个继承于Temporal, TemporalAdjuster, ChronoLocalDate的阴历实现类 × 
 
+#使用方法
+pom.xml加入
+```
+<dependency>
+   <groupId>cn.aethli</groupId>
+   <artifactId>lunar-date</artifactId>
+   <version>0.1.0</version>
+ </dependency>
+```
 
 *√为已实现×为可能以后会做*
